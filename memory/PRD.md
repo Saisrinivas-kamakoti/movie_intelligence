@@ -38,6 +38,7 @@ Build an AI/ML-powered model that analyzes genre performance in movies/shows acr
 - **Full Workspace**: Saved simulations, comparisons, notes with CRUD
 - **TMDB Ready**: Plug-in when API key obtained
 - **Regional Cinema**: 120+ real regional movies (Malayalam, Bengali, Marathi, Punjabi, Gujarati, Assamese, Odia)
+- **Deployment Ready**: Passed health check - lightweight ML (numpy only), optimized DB queries, no heavy deps
 
 ### Test Results (Phase 3)
 - Backend: 100% (16/16 tests)
