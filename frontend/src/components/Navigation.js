@@ -1,34 +1,40 @@
 import React from "react";
+import { Film, BarChart3, Globe, Briefcase, Users } from "lucide-react";
 
 const Navigation = ({ activeView, setActiveView }) => {
   const navItems = [
-    { id: "simulator", label: "Interactive Simulator", icon: "🎬" },
-    { id: "analytics", label: "Genre Analytics", icon: "📊" },
-    { id: "dashboard", label: "Market Insights", icon: "🌍" }
+    { id: "simulator", label: "Simulator", icon: Film },
+    { id: "analytics", label: "Genre Analytics", icon: BarChart3 },
+    { id: "dashboard", label: "Market Insights", icon: Globe },
+    { id: "studio", label: "Studio Pitch", icon: Briefcase },
+    { id: "directors", label: "Director Suite", icon: Users }
   ];
 
   return (
-    <nav className="border-b border-slate-800 bg-slate-900/30 backdrop-blur-sm">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex gap-1">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveView(item.id)}
-              className={`px-6 py-4 font-medium transition-all relative ${
-                activeView === item.id
-                  ? "text-blue-400 bg-slate-900/50"
-                  : "text-slate-400 hover:text-white hover:bg-slate-900/30"
-              }`}
-              data-testid={`nav-${item.id}`}
-            >
-              <span className="mr-2">{item.icon}</span>
-              {item.label}
-              {activeView === item.id && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-600" />
-              )}
-            </button>
-          ))}
+    <nav className="border-b border-slate-800/40 bg-[#0d1224]/50 backdrop-blur-sm">
+      <div className="max-w-[1400px] mx-auto px-6">
+        <div className="flex gap-1 overflow-x-auto">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveView(item.id)}
+                className={`flex items-center gap-2 px-5 py-3.5 text-sm font-medium transition-all relative whitespace-nowrap ${
+                  activeView === item.id
+                    ? "text-amber-400"
+                    : "text-slate-500 hover:text-slate-300"
+                }`}
+                data-testid={`nav-${item.id}`}
+              >
+                <Icon size={16} />
+                {item.label}
+                {activeView === item.id && (
+                  <div className="absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-amber-500 to-orange-500 rounded-full" />
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
     </nav>

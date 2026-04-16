@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell } from "recharts";
+import { Globe, Target, Trophy, TrendingUp } from "lucide-react";
 
 const Dashboard = ({ API }) => {
   const [regionalData, setRegionalData] = useState([]);
@@ -8,9 +8,7 @@ const Dashboard = ({ API }) => {
   const [topMovies, setTopMovies] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
+  useEffect(() => { fetchDashboardData(); }, []);
 
   const fetchDashboardData = async () => {
     try {
@@ -19,54 +17,59 @@ const Dashboard = ({ API }) => {
         axios.get(`${API}/analytics/audience`),
         axios.get(`${API}/movies/top?limit=10&metric=combined`)
       ]);
-
       setRegionalData(regionalRes.data.data);
       setAudienceData(audienceRes.data.segments);
       setTopMovies(moviesRes.data.top_movies);
       setLoading(false);
     } catch (error) {
-      console.error("Error fetching dashboard data:", error);
+      console.error("Error:", error);
       setLoading(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <div className="text-white text-xl">Loading market insights...</div>
-      </div>
-    );
-  }
-
-  const COLORS = ["#3b82f6", "#8b5cf6", "#10b981", "#f59e0b", "#ef4444"];
+  if (loading) return <div className="flex items-center justify-center h-96"><div className="text-white">Loading insights...</div></div>;
 
   return (
-    <div className="space-y-8" data-testid="dashboard-view">
-      {/* Header */}
+    <div className="space-y-6" data-testid="dashboard-view">
       <div>
-        <h2 className="text-3xl font-bold text-white mb-2">Market Intelligence Dashboard</h2>
-        <p className="text-slate-400">Regional analysis, audience insights, and top performers</p>
+        <h2 className="text-3xl font-black text-white tracking-tight">Market Intelligence</h2>
+        <p className="text-slate-500 mt-1">Regional analysis, audience segments & top performers</p>
       </div>
 
-      {/* Regional Performance */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        <div className="bg-slate-900/50 backdrop-blur-xl rounded-2xl border border-slate-800 p-6">
-          <h3 className="text-xl font-bold text-white mb-6">🌍 Regional Market Performance</h3>
-          <div className="space-y-4">
-            {regionalData.map((region, index) => (
-              <div key={index} className="bg-slate-800/50 rounded-lg p-4">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-white font-semibold">{region.region}</span>
-                  <span className="text-blue-400 font-bold text-xl">{region.avg_score}</span>
+      {/* Quick Stats */}
+      <div className="grid grid-cols-4 gap-3">
+        {[
+          { label: "Regions", value: regionalData.length, color: "text-amber-400", icon: Globe },
+          { label: "Segments", value: audienceData ? Object.keys(audienceData).length : 0, color: "text-violet-400", icon: Target },
+          { label: "Top Score", value: topMovies[0]?.combined_score || 0, color: "text-emerald-400", icon: TrendingUp },
+          { label: "Best BO", value: topMovies.length > 0 ? `${Math.max(...topMovies.map(m => m.box_office_cr))}Cr` : "N/A", color: "text-sky-400", icon: Trophy }
+        ].map(({ label, value, color, icon: Icon }) => (
+          <div key={label} className="bg-[#111827]/80 rounded-xl border border-slate-800/40 p-4">
+            <Icon size={16} className={`${color} mb-2`} />
+            <div className={`text-2xl font-black ${color}`}>{value}</div>
+            <div className="text-slate-500 text-[10px] uppercase tracking-wider">{label}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-4">
+        {/* Regional Performance */}
+        <div className="bg-[#111827]/80 rounded-2xl border border-slate-800/40 p-5">
+          <h3 className="text-white font-bold text-sm flex items-center gap-2 mb-4">
+            <Globe size={15} className="text-amber-400" /> Regional Market Performance
+          </h3>
+          <div className="space-y-3">
+            {regionalData.map((region, i) => (
+              <div key={i} className="bg-slate-900/40 rounded-lg p-3 border border-slate-800/20">
+                <div className="flex justify-between items-center mb-1.5">
+                  <span className="text-white font-semibold text-sm">{region.region}</span>
+                  <span className="text-amber-400 font-black text-lg">{region.avg_score}</span>
                 </div>
-                <div className="w-full bg-slate-700 rounded-full h-2">
-                  <div
-                    className="h-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-600"
-                    style={{ width: `${region.avg_score}%` }}
-                  />
+                <div className="w-full bg-slate-800/60 rounded-full h-1.5">
+                  <div className="h-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500" style={{ width: `${region.avg_score}%` }} />
                 </div>
-                <div className="mt-2 text-xs text-slate-400">
-                  Top genres: {Object.keys(region.genres).slice(0, 3).join(", ")}
+                <div className="mt-1.5 text-[10px] text-slate-500">
+                  Top: {Object.keys(region.genres).slice(0, 3).join(", ")}
                 </div>
               </div>
             ))}
@@ -74,21 +77,18 @@ const Dashboard = ({ API }) => {
         </div>
 
         {/* Audience Segments */}
-        <div className="bg-slate-900/50 backdrop-blur-xl rounded-2xl border border-slate-800 p-6">
-          <h3 className="text-xl font-bold text-white mb-6">🎯 Audience Segment Preferences</h3>
+        <div className="bg-[#111827]/80 rounded-2xl border border-slate-800/40 p-5">
+          <h3 className="text-white font-bold text-sm flex items-center gap-2 mb-4">
+            <Target size={15} className="text-violet-400" /> Audience Preferences
+          </h3>
           {audienceData && (
-            <div className="space-y-4">
-              {Object.entries(audienceData).map(([segment, genres], index) => (
-                <div key={segment} className="bg-slate-800/50 rounded-lg p-4">
-                  <div className="text-white font-semibold mb-2 capitalize">{segment}</div>
-                  <div className="flex flex-wrap gap-2">
-                    {genres.map((genre, gIndex) => (
-                      <span
-                        key={gIndex}
-                        className="px-3 py-1 bg-gradient-to-r from-blue-600/30 to-purple-600/30 border border-blue-500/30 rounded-full text-blue-300 text-xs font-medium"
-                      >
-                        {genre}
-                      </span>
+            <div className="space-y-3">
+              {Object.entries(audienceData).map(([segment, genres]) => (
+                <div key={segment} className="bg-slate-900/40 rounded-lg p-3 border border-slate-800/20">
+                  <div className="text-white font-semibold text-sm mb-2 capitalize">{segment}</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {genres.map((g, i) => (
+                      <span key={i} className="px-2.5 py-1 bg-violet-500/10 border border-violet-500/20 rounded text-violet-300 text-xs font-medium">{g}</span>
                     ))}
                   </div>
                 </div>
@@ -98,64 +98,38 @@ const Dashboard = ({ API }) => {
         </div>
       </div>
 
-      {/* Top Performing Movies */}
-      <div className="bg-slate-900/50 backdrop-blur-xl rounded-2xl border border-slate-800 p-6">
-        <h3 className="text-xl font-bold text-white mb-6">🏆 Top Performing Movies</h3>
+      {/* Top Movies Table */}
+      <div className="bg-[#111827]/80 rounded-2xl border border-slate-800/40 p-5">
+        <h3 className="text-white font-bold text-sm flex items-center gap-2 mb-4">
+          <Trophy size={15} className="text-emerald-400" /> Top Performing Movies
+        </h3>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-slate-700">
-                <th className="text-left text-slate-400 font-semibold p-3">Rank</th>
-                <th className="text-left text-slate-400 font-semibold p-3">Title</th>
-                <th className="text-left text-slate-400 font-semibold p-3">Genres</th>
-                <th className="text-left text-slate-400 font-semibold p-3">Region</th>
-                <th className="text-left text-slate-400 font-semibold p-3">Box Office</th>
-                <th className="text-left text-slate-400 font-semibold p-3">Score</th>
+              <tr className="border-b border-slate-700/40">
+                {["#", "Title", "Genres", "Language", "Region", "Box Office", "Score"].map(h => (
+                  <th key={h} className="text-left text-slate-500 text-[10px] font-semibold p-2.5 uppercase tracking-wider">{h}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {topMovies.map((movie, index) => (
-                <tr key={movie.id} className="border-b border-slate-800 hover:bg-slate-800/30 transition-colors">
-                  <td className="p-3">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
-                      {index + 1}
-                    </div>
+              {topMovies.map((movie, i) => (
+                <tr key={movie.id} className="border-b border-slate-800/20 hover:bg-slate-800/10 transition-colors">
+                  <td className="p-2.5">
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${i < 3 ? "bg-amber-500 text-black" : "bg-slate-800 text-slate-400"}`}>{i + 1}</div>
                   </td>
-                  <td className="p-3 text-white font-semibold">{movie.title}</td>
-                  <td className="p-3 text-slate-300 text-sm">{movie.genres.slice(0, 2).join(", ")}</td>
-                  <td className="p-3 text-slate-300 text-sm">{movie.region}</td>
-                  <td className="p-3 text-blue-400 font-semibold">₹{movie.box_office_cr}Cr</td>
-                  <td className="p-3">
-                    <span className="px-3 py-1 bg-green-500/20 border border-green-500/50 rounded-full text-green-400 font-bold text-sm">
-                      {movie.combined_score}
-                    </span>
+                  <td className="p-2.5 text-white font-semibold text-sm">{movie.title}</td>
+                  <td className="p-2.5 text-slate-400 text-xs">{movie.genres.slice(0, 2).join(", ")}</td>
+                  <td className="p-2.5 text-slate-400 text-xs">{movie.language}</td>
+                  <td className="p-2.5 text-slate-400 text-xs">{movie.region}</td>
+                  <td className="p-2.5 text-amber-400 font-semibold text-sm">{movie.box_office_cr}Cr</td>
+                  <td className="p-2.5">
+                    <span className="px-2 py-0.5 bg-emerald-500/15 border border-emerald-500/30 rounded text-emerald-400 font-bold text-xs">{movie.combined_score}</span>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
-      </div>
-
-      {/* Quick Stats */}
-      <div className="grid md:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-br from-blue-600/20 to-blue-900/20 border border-blue-500/30 rounded-xl p-6">
-          <div className="text-3xl font-black text-blue-400">{regionalData.length}</div>
-          <div className="text-slate-300 text-sm mt-1">Market Regions</div>
-        </div>
-        <div className="bg-gradient-to-br from-purple-600/20 to-purple-900/20 border border-purple-500/30 rounded-xl p-6">
-          <div className="text-3xl font-black text-purple-400">{audienceData ? Object.keys(audienceData).length : 0}</div>
-          <div className="text-slate-300 text-sm mt-1">Audience Segments</div>
-        </div>
-        <div className="bg-gradient-to-br from-green-600/20 to-green-900/20 border border-green-500/30 rounded-xl p-6">
-          <div className="text-3xl font-black text-green-400">{topMovies.length > 0 ? topMovies[0].combined_score : 0}</div>
-          <div className="text-slate-300 text-sm mt-1">Top Score</div>
-        </div>
-        <div className="bg-gradient-to-br from-orange-600/20 to-orange-900/20 border border-orange-500/30 rounded-xl p-6">
-          <div className="text-3xl font-black text-orange-400">
-            {topMovies.length > 0 ? `₹${Math.max(...topMovies.map(m => m.box_office_cr))}Cr` : "N/A"}
-          </div>
-          <div className="text-slate-300 text-sm mt-1">Highest Box Office</div>
         </div>
       </div>
     </div>
