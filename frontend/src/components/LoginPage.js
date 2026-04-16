@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useAuth } from "@/components/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { Mail, Lock, User, LogIn } from "lucide-react";
 
 const LoginPage = () => {
   const { loginWithGoogle, loginWithEmail, registerWithEmail } = useAuth();
+  const navigate = useNavigate();
   const [isRegister, setIsRegister] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,6 +23,7 @@ const LoginPage = () => {
       } else {
         await loginWithEmail(email, password);
       }
+      navigate("/", { replace: true });
     } catch (err) {
       setError(err.response?.data?.detail || "Authentication failed");
     } finally {
@@ -126,9 +129,9 @@ const LoginPage = () => {
 
           {/* Guest mode */}
           <div className="mt-4 text-center">
-            <a href="/" className="text-slate-500 hover:text-slate-400 text-xs transition-all" data-testid="continue-guest">
+            <button onClick={() => navigate("/")} className="text-slate-500 hover:text-slate-400 text-xs transition-all" data-testid="continue-guest">
               Continue as guest (limited features)
-            </a>
+            </button>
           </div>
         </div>
       </div>
