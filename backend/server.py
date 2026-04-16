@@ -19,6 +19,8 @@ from tmdb_integration import tmdb_client
 from studio_presentation import presentation_generator
 from feedback_system import FeedbackSystem, Feedback
 from director_testing import DIRECTOR_PRESETS, CASE_STUDIES, calculate_roi
+from auth import auth_router, init_auth
+from workspace import workspace_router, init_workspace
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -31,6 +33,8 @@ db = client[os.environ['DB_NAME']]
 # Initialize systems
 ml_engine = CineSignalMLEngine(MOVIE_DATA)
 feedback_system = FeedbackSystem(db)
+init_auth(db)
+init_workspace(db)
 
 app = FastAPI(title="CineSignal API", description="Film Demand Intelligence Platform - Advanced")
 api_router = APIRouter(prefix="/api")
@@ -429,7 +433,7 @@ async def get_metadata():
         "tones": ["Dark", "Light", "Dramatic", "Action-Packed", "Emotional", "Suspenseful", "Humorous"],
         "budget_tiers": ["Low (<30Cr)", "Medium (30-100Cr)", "High (100Cr+)"],
         "release_types": ["Theatrical", "OTT", "Hybrid"],
-        "languages": ["Hindi", "Tamil", "Telugu", "Malayalam", "Kannada", "English", "Bengali", "Marathi"],
+        "languages": ["Hindi", "Tamil", "Telugu", "Malayalam", "Kannada", "English", "Bengali", "Marathi", "Punjabi", "Gujarati", "Assamese", "Odia"],
         "regions": ["North India", "South India", "Pan-India", "Global"]
     }
 
@@ -445,6 +449,8 @@ async def get_simulation_history(limit: int = 50):
 # ============= APP SETUP =============
 
 app.include_router(api_router)
+app.include_router(auth_router)
+app.include_router(workspace_router)
 
 app.add_middleware(
     CORSMiddleware,

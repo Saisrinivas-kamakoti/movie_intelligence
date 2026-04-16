@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Slider } from "@/components/ui/slider";
-import { Zap, TrendingUp, Target, AlertTriangle, DollarSign, Film } from "lucide-react";
+import { Zap, TrendingUp, Target, AlertTriangle, DollarSign, Film, Save } from "lucide-react";
 import PredictionResults from "@/components/PredictionResults";
 import FeedbackPanel from "@/components/FeedbackPanel";
 
-const Simulator = ({ metadata, API }) => {
+const Simulator = ({ metadata, API, user }) => {
   const [formData, setFormData] = useState({
     genres: [],
     tone: "Dramatic",
@@ -29,6 +29,23 @@ const Simulator = ({ metadata, API }) => {
         : [...prev.genres, genre].slice(0, 3);
       return { ...prev, genres };
     });
+  };
+
+  const [saved, setSaved] = useState(false);
+
+  const handleSaveToWorkspace = async () => {
+    if (!user || !prediction) return;
+    try {
+      await axios.post(`${API}/workspace/simulations`, {
+        title: `${formData.genres.join(" + ")} - Score ${prediction.overall_score}`,
+        concept: formData,
+        prediction
+      }, { withCredentials: true });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      console.error("Save error:", err);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -199,6 +216,19 @@ const Simulator = ({ metadata, API }) => {
                 data-testid="export-pdf-button"
               >
                 <DollarSign size={14} /> Export Pitch Deck (PDF)
+              </button>
+            )}
+
+            {prediction && user && (
+              <button
+                type="button"
+                onClick={handleSaveToWorkspace}
+                className={`w-full font-medium py-3 rounded-xl border transition-all flex items-center justify-center gap-2 text-sm ${
+                  saved ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" : "bg-slate-800 hover:bg-slate-700 text-white border-slate-700/50"
+                }`}
+                data-testid="save-workspace-button"
+              >
+                <Save size={14} /> {saved ? "Saved!" : "Save to Workspace"}
               </button>
             )}
           </form>

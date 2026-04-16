@@ -12,7 +12,7 @@ GENRES = [
 
 TONES = ["Dark", "Light", "Dramatic", "Action-Packed", "Emotional", "Suspenseful", "Humorous"]
 RELEASE_TYPES = ["Theatrical", "OTT", "Hybrid"]
-LANGUAGES = ["Hindi", "Tamil", "Telugu", "Malayalam", "Kannada", "English", "Bengali", "Marathi"]
+LANGUAGES = ["Hindi", "Tamil", "Telugu", "Malayalam", "Kannada", "English", "Bengali", "Marathi", "Punjabi", "Gujarati", "Assamese", "Odia"]
 REGIONS = ["North India", "South India", "Pan-India", "Global"]
 
 class MovieDataset:
@@ -99,8 +99,13 @@ class MovieDataset:
         for movie in indian_movies + global_movies:
             movies.append(self._create_movie_entry(movie))
         
+        # Add regional cinema expansion
+        from regional_dataset import REGIONAL_MOVIES
+        for movie in REGIONAL_MOVIES:
+            movies.append(self._create_movie_entry(movie))
+        
         # Generate synthetic movies to reach target count
-        remaining = count - len(movies)
+        remaining = max(0, count - len(movies))
         for i in range(remaining):
             movies.append(self._generate_synthetic_movie(i))
         
@@ -231,4 +236,4 @@ class MovieDataset:
 
 # Initialize global dataset
 MOVIE_DB = MovieDataset()
-MOVIE_DATA = MOVIE_DB.generate_movie_dataset(500)
+MOVIE_DATA = MOVIE_DB.generate_movie_dataset(700)

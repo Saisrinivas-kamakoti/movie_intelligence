@@ -1,13 +1,14 @@
 import React from "react";
-import { Film, BarChart3, Globe, Briefcase, Users } from "lucide-react";
+import { Film, BarChart3, Globe, Briefcase, Users, FolderOpen } from "lucide-react";
 
-const Navigation = ({ activeView, setActiveView }) => {
+const Navigation = ({ activeView, setActiveView, isLoggedIn }) => {
   const navItems = [
     { id: "simulator", label: "Simulator", icon: Film },
     { id: "analytics", label: "Genre Analytics", icon: BarChart3 },
     { id: "dashboard", label: "Market Insights", icon: Globe },
     { id: "studio", label: "Studio Pitch", icon: Briefcase },
-    { id: "directors", label: "Director Suite", icon: Users }
+    { id: "directors", label: "Director Suite", icon: Users },
+    ...(isLoggedIn ? [{ id: "workspace", label: "My Workspace", icon: FolderOpen }] : [])
   ];
 
   return (
