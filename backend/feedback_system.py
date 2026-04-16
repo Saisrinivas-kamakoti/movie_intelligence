@@ -47,8 +47,10 @@ class FeedbackSystem:
                 "accuracy_metrics": {}
             }
         
-        # Get all feedback
-        feedback_list = await self.feedback_collection.find({}).to_list(1000)
+        # Get all feedback with projection
+        feedback_list = await self.feedback_collection.find(
+            {}, {"_id": 0, "rating": 1, "prediction": 1, "actual_result": 1}
+        ).to_list(1000)
         
         # Calculate ratings
         ratings = [f['rating'] for f in feedback_list]
@@ -87,7 +89,9 @@ class FeedbackSystem:
     
     async def get_improvement_insights(self) -> List[Dict]:
         """Get insights for model improvement"""
-        feedback_list = await self.feedback_collection.find({}).to_list(1000)
+        feedback_list = await self.feedback_collection.find(
+            {}, {"_id": 0, "rating": 1, "concept": 1, "prediction": 1, "actual_result": 1}
+        ).to_list(1000)
         
         insights = []
         

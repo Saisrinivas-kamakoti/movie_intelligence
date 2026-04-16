@@ -1,0 +1,69 @@
+{
+  "genre_weights": {
+    "Action": 7.2,
+    "Drama": 7.0,
+    "Comedy": 6.9,
+    "Thriller": 7.1,
+    "Romance": 7.0,
+    "Horror": 7.2,
+    "Sci-Fi": 7.2,
+    "Fantasy": 7.2,
+    "Crime": 7.1,
+    "Mystery": 7.1,
+    "Family": 7.0,
+    "Musical": 6.9,
+    "Historical": 7.1,
+    "Biographical": 7.3,
+    "Social": 7.0
+  },
+  "tone_weights": {
+    "Dark": 6.8,
+    "Light": 6.0,
+    "Dramatic": 7.5,
+    "Action-Packed": 7.8,
+    "Emotional": 7.2,
+    "Suspenseful": 7.6,
+    "Humorous": 6.4
+  },
+  "language_multipliers": {
+    "Hindi": 1.1,
+    "Tamil": 1.05,
+    "Telugu": 1.08,
+    "Malayalam": 1.0,
+    "Kannada": 0.98,
+    "English": 1.15,
+    "Bengali": 0.95,
+    "Marathi": 0.96,
+    "Punjabi": 0.93,
+    "Gujarati": 0.92,
+    "Assamese": 0.88,
+    "Odia": 0.9
+  },
+  "budget_weights": {
+    "Low (<30Cr)": 0.85,
+    "Medium (30-100Cr)": 1.0,
+    "High (100Cr+)": 1.15
+  },
+  "release_weights": {
+    "Theatrical": 1.0,
+    "OTT": 1.05,
+    "Hybrid": 1.1
+  },
+  "star_power_coeff": 1.8,
+  "novelty_coeff": 1.5,
+  "family_coeff": 1.2,
+  "genre_combo_bonus": {
+    "Action+Drama": 5.0,
+    "Action+Thriller": 6.0,
+    "Drama+Social": 4.5,
+    "Crime+Thriller": 5.5,
+    "Comedy+Drama": 4.0,
+    "Horror+Thriller": 4.5,
+    "Sci-Fi+Action": 5.0,
+    "Romance+Comedy": 3.5,
+    "Biographical+Drama": 4.8,
+    "Action+Comedy": 3.8,
+    "Historical+Drama": 4.2,
+    "Fantasy+Action": 4.0
+  }
+}

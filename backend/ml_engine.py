@@ -2,7 +2,6 @@
 import numpy as np
 from typing import Dict, List, Tuple
 import random
-from sklearn.preprocessing import MinMaxScaler
 
 class CineSignalMLEngine:
     """AI/ML engine for film demand intelligence"""
@@ -12,7 +11,6 @@ class CineSignalMLEngine:
         self.genre_patterns = self._analyze_genre_patterns()
         self.audience_preferences = self._analyze_audience_preferences()
         self.regional_trends = self._analyze_regional_trends()
-        self.scaler = MinMaxScaler()
     
     def predict_success(self, concept: Dict) -> Dict:
         """Predict success score for a film concept"""
