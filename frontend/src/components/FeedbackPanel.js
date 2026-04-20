@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { Star, Send, CheckCircle } from "lucide-react";
+import { cinesignalLocal } from "@/lib/cinesignalLocal";
 
-const FeedbackPanel = ({ API, concept, prediction, onClose }) => {
+const FeedbackPanel = ({ concept, prediction, onClose }) => {
   const [rating, setRating] = useState(0);
   const [comments, setComments] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -12,11 +12,11 @@ const FeedbackPanel = ({ API, concept, prediction, onClose }) => {
     if (rating === 0) return;
     setSubmitting(true);
     try {
-      await axios.post(`${API}/feedback`, {
+      await cinesignalLocal.submitFeedback({
         concept,
         prediction,
         rating,
-        comments: comments || null
+        comments: comments || null,
       });
       setSubmitted(true);
     } catch (err) {

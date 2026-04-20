@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { useAuth } from "@/components/AuthContext";
 import { Save, Trash2, FileText, Layers, StickyNote, Plus, X } from "lucide-react";
-
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+import { cinesignalLocal } from "@/lib/cinesignalLocal";
 
 const Workspace = () => {
   const { user } = useAuth();
@@ -17,19 +15,19 @@ const Workspace = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user) fetchWorkspace();
+    fetchWorkspace();
   }, [user]);
 
   const fetchWorkspace = async () => {
     try {
       const [simsRes, compsRes, notesRes] = await Promise.all([
-        axios.get(`${API}/workspace/simulations`, { withCredentials: true }),
-        axios.get(`${API}/workspace/comparisons`, { withCredentials: true }),
-        axios.get(`${API}/workspace/notes`, { withCredentials: true })
+        cinesignalLocal.getSimulations(),
+        cinesignalLocal.getComparisons(),
+        cinesignalLocal.getNotes(),
       ]);
-      setSimulations(simsRes.data.simulations);
-      setComparisons(compsRes.data.comparisons);
-      setNotes(notesRes.data.notes);
+      setSimulations(simsRes);
+      setComparisons(compsRes);
+      setNotes(notesRes);
     } catch (err) {
       console.error("Workspace error:", err);
     } finally {
@@ -39,14 +37,14 @@ const Workspace = () => {
 
   const deleteSimulation = async (simId) => {
     try {
-      await axios.delete(`${API}/workspace/simulations/${simId}`, { withCredentials: true });
+      await cinesignalLocal.deleteSimulation(simId);
       setSimulations(simulations.filter(s => s.sim_id !== simId));
     } catch (err) { console.error(err); }
   };
 
   const deleteComparison = async (compId) => {
     try {
-      await axios.delete(`${API}/workspace/comparisons/${compId}`, { withCredentials: true });
+      await cinesignalLocal.deleteComparison(compId);
       setComparisons(comparisons.filter(c => c.comp_id !== compId));
     } catch (err) { console.error(err); }
   };
@@ -54,7 +52,7 @@ const Workspace = () => {
   const createNote = async () => {
     if (!noteTitle.trim()) return;
     try {
-      await axios.post(`${API}/workspace/notes`, { title: noteTitle, content: noteContent, category: "general" }, { withCredentials: true });
+      await cinesignalLocal.createNote({ title: noteTitle, content: noteContent, category: "general" });
       setNoteTitle(""); setNoteContent(""); setShowNoteForm(false);
       fetchWorkspace();
     } catch (err) { console.error(err); }
@@ -62,20 +60,10 @@ const Workspace = () => {
 
   const deleteNote = async (noteId) => {
     try {
-      await axios.delete(`${API}/workspace/notes/${noteId}`, { withCredentials: true });
+      await cinesignalLocal.deleteNote(noteId);
       setNotes(notes.filter(n => n.note_id !== noteId));
     } catch (err) { console.error(err); }
   };
-
-  if (!user) {
-    return (
-      <div className="text-center py-20">
-        <Save size={48} className="text-slate-700 mx-auto mb-4" />
-        <h3 className="text-white font-bold text-lg mb-2">Sign in to access your Workspace</h3>
-        <p className="text-slate-500 text-sm">Save simulations, comparisons, and notes to your personal workspace</p>
-      </div>
-    );
-  }
 
   const tabs = [
     { id: "simulations", label: "Simulations", icon: FileText, count: simulations.length },
@@ -88,7 +76,7 @@ const Workspace = () => {
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-black text-white tracking-tight">Your Workspace</h2>
-          <p className="text-slate-500 mt-1">Welcome back, {user.name || user.email}</p>
+          <p className="text-slate-500 mt-1">{user ? `Welcome back, ${user.name || user.email}` : "Local browser workspace for this Netlify deployment"}</p>
         </div>
       </div>
 

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, AreaChart, Area } from "recharts";
+import { cinesignalLocal } from "@/lib/cinesignalLocal";
 
-const Analytics = ({ API }) => {
+const Analytics = () => {
   const [genreData, setGenreData] = useState([]);
   const [trendData, setTrendData] = useState([]);
   const [combinationData, setCombinationData] = useState([]);
@@ -13,13 +13,13 @@ const Analytics = ({ API }) => {
   const fetchAnalytics = async () => {
     try {
       const [genreRes, trendRes, comboRes] = await Promise.all([
-        axios.get(`${API}/analytics/genre-performance`),
-        axios.get(`${API}/analytics/trends?years=8`),
-        axios.get(`${API}/analytics/genre-combinations`)
+        cinesignalLocal.getGenrePerformance(),
+        cinesignalLocal.getTrends(8),
+        cinesignalLocal.getGenreCombinations(),
       ]);
-      setGenreData(genreRes.data.data);
-      setTrendData(trendRes.data.data);
-      setCombinationData(comboRes.data.patterns.slice(0, 12));
+      setGenreData(genreRes.data);
+      setTrendData(trendRes.data);
+      setCombinationData(comboRes.patterns.slice(0, 12));
       setLoading(false);
     } catch (error) {
       console.error("Error:", error);

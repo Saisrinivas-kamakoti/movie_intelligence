@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { Slider } from "@/components/ui/slider";
 import { Zap, TrendingUp, Target, AlertTriangle, DollarSign, Film, Save } from "lucide-react";
 import PredictionResults from "@/components/PredictionResults";
 import FeedbackPanel from "@/components/FeedbackPanel";
+import { cinesignalLocal } from "@/lib/cinesignalLocal";
 
-const Simulator = ({ metadata, API, user }) => {
+const Simulator = ({ metadata, user }) => {
   const [formData, setFormData] = useState({
     genres: [],
     tone: "Dramatic",
@@ -34,13 +34,13 @@ const Simulator = ({ metadata, API, user }) => {
   const [saved, setSaved] = useState(false);
 
   const handleSaveToWorkspace = async () => {
-    if (!user || !prediction) return;
+    if (!prediction) return;
     try {
-      await axios.post(`${API}/workspace/simulations`, {
+      await cinesignalLocal.saveSimulation({
         title: `${formData.genres.join(" + ")} - Score ${prediction.overall_score}`,
         concept: formData,
-        prediction
-      }, { withCredentials: true });
+        prediction,
+      });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
@@ -58,11 +58,11 @@ const Simulator = ({ metadata, API, user }) => {
     setError(null);
     setShowFeedback(false);
     try {
-      const response = await axios.post(`${API}/simulate`, formData);
-      setPrediction(response.data);
+      const response = await cinesignalLocal.simulateConcept(formData);
+      setPrediction(response);
       setShowFeedback(true);
     } catch (err) {
-      setError(err.response?.data?.detail || "Simulation failed. Please try again.");
+      setError(err.message || "Simulation failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -70,13 +70,11 @@ const Simulator = ({ metadata, API, user }) => {
 
   const handleExportPDF = async () => {
     try {
-      const response = await axios.post(`${API}/export/pitch-deck`, formData, {
-        responseType: "blob"
-      });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const blob = await cinesignalLocal.exportPitchDeck(formData, prediction);
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", "CineSignal_PitchDeck.pdf");
+      link.setAttribute("download", "CineSignal_PitchBrief.txt");
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -215,11 +213,11 @@ const Simulator = ({ metadata, API, user }) => {
                 className="w-full bg-slate-800 hover:bg-slate-700 text-white font-medium py-3 rounded-xl border border-slate-700/50 transition-all flex items-center justify-center gap-2 text-sm"
                 data-testid="export-pdf-button"
               >
-                <DollarSign size={14} /> Export Pitch Deck (PDF)
+                <DollarSign size={14} /> Export Pitch Brief
               </button>
             )}
 
-            {prediction && user && (
+            {prediction && (
               <button
                 type="button"
                 onClick={handleSaveToWorkspace}
@@ -241,7 +239,6 @@ const Simulator = ({ metadata, API, user }) => {
               <PredictionResults prediction={prediction} />
               {showFeedback && (
                 <FeedbackPanel
-                  API={API}
                   concept={formData}
                   prediction={prediction}
                   onClose={() => setShowFeedback(false)}

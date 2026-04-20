@@ -5,71 +5,54 @@ This repository is a full-stack app:
 - `frontend/` = React app
 - `backend/` = FastAPI API
 
-## Recommended free deployment
+## Recommended deployment stack
 
-### Frontend
+### Netlify-only deployment
 
-Deploy `frontend/` to Vercel.
+This app can now run as a static Netlify deployment with no paid backend.
 
-Settings:
+The repo includes a root `netlify.toml` configured for the React frontend inside `frontend/`.
 
-- Framework preset: `Create React App`
-- Root directory: `frontend`
-- Build command: `npm run build`
-- Output directory: `build`
-- Environment variable:
-  - `REACT_APP_BACKEND_URL=https://your-backend-service.onrender.com`
+Netlify import settings:
 
-The included `frontend/vercel.json` rewrites all routes to `index.html` so React Router works in production.
-Use `frontend/.env.sample` as the template for frontend environment variables.
-
-### Backend
-
-Deploy `backend/` to Render.
-
-Settings:
-
-- Runtime: `Python`
-- Root directory: `backend`
-- Build command: `pip install -r requirements.txt`
-- Start command: `uvicorn server:app --host 0.0.0.0 --port $PORT`
+- Repository root: this repo
+- Base directory: `frontend`
+- Build command: `npm install --legacy-peer-deps && npm run build`
+- Publish directory: `build`
 
 Environment variables:
 
-- `MONGO_URL`
-- `DB_NAME`
-- `CORS_ORIGINS`
-- `TMDB_API_KEY` (optional but recommended)
+- None required for the Netlify-only version
 
-The included `render.yaml` can be used with Render Blueprint deployment.
-Use `backend/.env.sample` as the template for backend environment variables.
+The included `netlify.toml` and `frontend/public/_redirects` ensure React Router routes resolve to `index.html`.
+The Netlify config also pins `NODE_VERSION=20` to avoid older runtime issues.
 
-### Database
+### What works in the Netlify-only version
 
-Use MongoDB Atlas free tier.
+- Film concept simulator
+- Genre analytics
+- Market intelligence dashboard
+- Director presets
+- Director idea lab
+- Concept comparison
+- Browser-local workspace
+- Browser-local sign-in and saved notes
 
-Create a database and set:
+### Important tradeoff
 
-- `MONGO_URL`
-- `DB_NAME=cinesignal`
+This version uses:
 
-### Important note on auth
+- local browser storage instead of MongoDB
+- browser-local auth instead of production OAuth
+- downloadable pitch briefs instead of backend-generated PDFs
 
-Google OAuth uses Emergent session exchange and depends on:
+That makes it fully deployable on free Netlify hosting without Render.
 
-- frontend origin matching the deployed frontend URL
-- backend cookies being sent cross-site
-- `CORS_ORIGINS` including the deployed frontend origin
+## One-click Netlify checklist
 
-For production:
+After importing the repo into Netlify:
 
-- frontend and backend must both be on HTTPS
-- the backend cookie settings already expect secure cross-site usage
-
-## Suggested rollout order
-
-1. Deploy backend on Render
-2. Copy backend URL
-3. Deploy frontend on Vercel with `REACT_APP_BACKEND_URL`
-4. Add frontend URL to backend `CORS_ORIGINS`
-5. Test login, simulator, analytics, and workspace features
+1. Confirm the build uses `frontend/`
+2. Deploy the site
+3. Open the generated `https://...netlify.app` URL
+4. Test simulator, analytics, director suite, and workspace in the browser

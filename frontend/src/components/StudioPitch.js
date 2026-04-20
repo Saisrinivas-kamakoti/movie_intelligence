@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { Slider } from "@/components/ui/slider";
 import { Plus, Trash2, ArrowUpDown, Download, BarChart3 } from "lucide-react";
+import { cinesignalLocal } from "@/lib/cinesignalLocal";
 
-const StudioPitch = ({ API, metadata }) => {
+const StudioPitch = ({ metadata }) => {
   const emptyRow = () => ({
     id: Date.now(),
     genres: [],
@@ -45,10 +45,8 @@ const StudioPitch = ({ API, metadata }) => {
     if (valid.length === 0) return;
     setLoading(true);
     try {
-      const response = await axios.post(`${API}/compare`, {
-        concepts: valid.map(({ id, ...rest }) => rest)
-      });
-      setResults(response.data);
+      const response = await cinesignalLocal.compareConcepts(valid.map(({ id, ...rest }) => rest));
+      setResults(response);
     } catch (err) {
       console.error("Comparison error:", err);
     } finally {
@@ -59,11 +57,12 @@ const StudioPitch = ({ API, metadata }) => {
   const handleExportPDF = async (concept) => {
     try {
       const { id, ...conceptData } = concept;
-      const response = await axios.post(`${API}/export/pitch-deck`, conceptData, { responseType: "blob" });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const prediction = await cinesignalLocal.simulateConcept(conceptData);
+      const blob = await cinesignalLocal.exportPitchDeck(conceptData, prediction);
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", `CineSignal_Pitch_${concept.genres.join("_")}.pdf`);
+      link.setAttribute("download", `CineSignal_Pitch_${concept.genres.join("_")}.txt`);
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -88,7 +87,7 @@ const StudioPitch = ({ API, metadata }) => {
               <div className="flex gap-2">
                 {concept.genres.length > 0 && (
                   <button onClick={() => handleExportPDF(concept)} className="text-amber-400 hover:text-amber-300 text-xs flex items-center gap-1" data-testid={`export-concept-${index}`}>
-                    <Download size={12} /> PDF
+                    <Download size={12} /> Brief
                   </button>
                 )}
                 {concepts.length > 1 && (

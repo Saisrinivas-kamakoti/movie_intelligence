@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { Globe, Target, Trophy, TrendingUp } from "lucide-react";
+import { cinesignalLocal } from "@/lib/cinesignalLocal";
 
-const Dashboard = ({ API }) => {
+const Dashboard = () => {
   const [regionalData, setRegionalData] = useState([]);
   const [audienceData, setAudienceData] = useState(null);
   const [topMovies, setTopMovies] = useState([]);
@@ -13,13 +13,13 @@ const Dashboard = ({ API }) => {
   const fetchDashboardData = async () => {
     try {
       const [regionalRes, audienceRes, moviesRes] = await Promise.all([
-        axios.get(`${API}/analytics/regional`),
-        axios.get(`${API}/analytics/audience`),
-        axios.get(`${API}/movies/top?limit=10&metric=combined`)
+        cinesignalLocal.getRegionalAnalysis(),
+        cinesignalLocal.getAudienceInsights(),
+        cinesignalLocal.getTopMovies(10),
       ]);
-      setRegionalData(regionalRes.data.data);
-      setAudienceData(audienceRes.data.segments);
-      setTopMovies(moviesRes.data.top_movies);
+      setRegionalData(regionalRes.data);
+      setAudienceData(audienceRes.segments);
+      setTopMovies(moviesRes.top_movies);
       setLoading(false);
     } catch (error) {
       console.error("Error:", error);

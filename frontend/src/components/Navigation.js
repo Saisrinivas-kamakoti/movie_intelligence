@@ -8,7 +8,7 @@ const Navigation = ({ activeView, setActiveView, isLoggedIn }) => {
     { id: "dashboard", label: "Market Insights", icon: Globe },
     { id: "studio", label: "Studio Pitch", icon: Briefcase },
     { id: "directors", label: "Director Suite", icon: Users },
-    ...(isLoggedIn ? [{ id: "workspace", label: "My Workspace", icon: FolderOpen }] : [])
+    { id: "workspace", label: isLoggedIn ? "My Workspace" : "Workspace", icon: FolderOpen },
   ];
 
   return (

@@ -21,18 +21,29 @@ from feedback_system import FeedbackSystem, Feedback
 from director_testing import DIRECTOR_PRESETS, CASE_STUDIES, calculate_roi
 from auth import auth_router, init_auth
 from workspace import workspace_router, init_workspace
+from director_advisor import DirectorIdeaAdvisor
+from memory_store import MemoryClient, MemoryDatabase
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 # MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+mongo_url = os.environ.get("MONGO_URL")
+db_name = os.environ.get("DB_NAME", "cinesignal")
+
+if mongo_url:
+    client = AsyncIOMotorClient(mongo_url)
+    db = client[db_name]
+    database_mode = "mongodb"
+else:
+    client = MemoryClient()
+    db = MemoryDatabase()
+    database_mode = "memory"
 
 # Initialize systems
 ml_engine = CineSignalMLEngine(MOVIE_DATA)
 feedback_system = FeedbackSystem(db)
+director_idea_advisor = DirectorIdeaAdvisor(ml_engine)
 init_auth(db)
 init_workspace(db)
 
@@ -62,6 +73,15 @@ class FeedbackInput(BaseModel):
 class ComparisonInput(BaseModel):
     concepts: List[ConceptSimulation]
 
+class DirectorIdeaInput(BaseModel):
+    mode: str = Field(default="analyze", description="analyze or generate")
+    concept_text: Optional[str] = Field(default="", max_length=2000)
+    target_genre: Optional[str] = None
+    preferred_language: str = Field(default="Hindi")
+    release_type: str = Field(default="Theatrical")
+    budget_tier: str = Field(default="Medium (30-100Cr)")
+    star_power: int = Field(default=5, ge=1, le=10)
+
 
 # ============= CORE ROUTES =============
 
@@ -72,7 +92,8 @@ async def root():
         "version": "2.0.0",
         "status": "active",
         "total_movies": len(MOVIE_DATA),
-        "features": ["simulator", "analytics", "neural_network", "tmdb", "pdf_export", "feedback", "director_presets", "roi_calculator"]
+        "features": ["simulator", "analytics", "neural_network", "tmdb", "pdf_export", "feedback", "director_presets", "roi_calculator", "idea_lab"],
+        "database_mode": database_mode,
     }
 
 @api_router.post("/simulate")
@@ -391,6 +412,19 @@ async def get_case_study(index: int):
         return CASE_STUDIES[index]
     raise HTTPException(status_code=404, detail="Case study not found")
 
+@api_router.post("/directors/idea-lab")
+async def analyze_director_idea(payload: DirectorIdeaInput):
+    try:
+        if payload.mode == "analyze" and len(payload.concept_text.strip()) < 40:
+            raise HTTPException(status_code=400, detail="Please describe the concept in at least 40 characters for analysis.")
+
+        result = director_idea_advisor.analyze(payload.model_dump())
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 # ============= METADATA & STATS =============
 
@@ -420,8 +454,9 @@ async def get_statistics():
             "region_distribution": region_dist,
             "years_covered": sorted(list(set(m["year"] for m in MOVIE_DATA))),
             "feedback": fb_stats,
-            "ml_models": ["Heuristic (v1)", "Neural Network (v1)"],
-            "features": ["simulator", "analytics", "neural_network", "tmdb", "pdf_export", "feedback", "director_presets", "roi_calculator", "case_studies", "comparison"]
+            "ml_models": ["Heuristic (v1)", "Neural Network (v1)", "Director Idea Advisor (v1)"],
+            "features": ["simulator", "analytics", "neural_network", "tmdb", "pdf_export", "feedback", "director_presets", "roi_calculator", "case_studies", "comparison", "idea_lab"],
+            "database_mode": database_mode,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -434,7 +469,8 @@ async def get_metadata():
         "budget_tiers": ["Low (<30Cr)", "Medium (30-100Cr)", "High (100Cr+)"],
         "release_types": ["Theatrical", "OTT", "Hybrid"],
         "languages": ["Hindi", "Tamil", "Telugu", "Malayalam", "Kannada", "English", "Bengali", "Marathi", "Punjabi", "Gujarati", "Assamese", "Odia"],
-        "regions": ["North India", "South India", "Pan-India", "Global"]
+        "regions": ["North India", "South India", "Pan-India", "Global"],
+        "director_lab_modes": ["analyze", "generate"],
     }
 
 @api_router.get("/simulations/history")
@@ -467,7 +503,7 @@ logger = logging.getLogger(__name__)
 async def startup_event():
     logger.info("CineSignal API v2.0 starting up...")
     logger.info(f"Loaded {len(MOVIE_DATA)} movies, {len(DIRECTOR_PRESETS)} director presets, {len(CASE_STUDIES)} case studies")
-    logger.info("ML Engine + Neural Network initialized")
+    logger.info(f"ML Engine + Neural Network initialized | storage={database_mode}")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
