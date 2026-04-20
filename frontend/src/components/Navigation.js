@@ -12,9 +12,9 @@ const Navigation = ({ activeView, setActiveView, isLoggedIn }) => {
   ];
 
   return (
-    <nav className="border-b border-slate-800/40 bg-[#0d1224]/50 backdrop-blur-sm">
+    <nav className="sticky top-0 z-20 border-b border-slate-800/40 bg-[#0d1224]/70 backdrop-blur-xl">
       <div className="max-w-[1400px] mx-auto px-6">
-        <div className="flex gap-1 overflow-x-auto">
+        <div className="flex gap-1 overflow-x-auto py-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             return (

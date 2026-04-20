@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Star, Send, CheckCircle } from "lucide-react";
-import { cinesignalLocal } from "@/lib/cinesignalLocal";
+import { cinesignalClient } from "@/lib/cinesignalClient";
 
 const FeedbackPanel = ({ concept, prediction, onClose }) => {
   const [rating, setRating] = useState(0);
@@ -12,7 +12,7 @@ const FeedbackPanel = ({ concept, prediction, onClose }) => {
     if (rating === 0) return;
     setSubmitting(true);
     try {
-      await cinesignalLocal.submitFeedback({
+      await cinesignalClient.submitFeedback({
         concept,
         prediction,
         rating,

@@ -23,6 +23,9 @@ Netlify import settings:
 Environment variables:
 
 - None required for the Netlify-only version
+- Optional future API mode:
+- `REACT_APP_DATA_MODE=hybrid`
+- `REACT_APP_API_BASE=https://your-api.example.com`
 
 The included `netlify.toml` and `frontend/public/_redirects` ensure React Router routes resolve to `index.html`.
 The Netlify config also pins `NODE_VERSION=20` to avoid older runtime issues.
@@ -47,6 +50,16 @@ This version uses:
 - downloadable pitch briefs instead of backend-generated PDFs
 
 That makes it fully deployable on free Netlify hosting without Render.
+
+## Future backend-ready mode
+
+The frontend now uses a shared client wrapper instead of calling the local runtime directly.
+
+- `frontend/src/lib/cinesignalClient.js` chooses between browser-local mode and a future API mode.
+- If you later deploy an API, you can keep the same UI and switch the frontend with:
+- `REACT_APP_DATA_MODE=hybrid`
+- `REACT_APP_API_BASE=https://your-api.example.com`
+- If the API is unreachable, the client falls back to the browser runtime so demos do not fully break.
 
 ## One-click Netlify checklist
 

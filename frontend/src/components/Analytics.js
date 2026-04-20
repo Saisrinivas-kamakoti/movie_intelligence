@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, AreaChart, Area } from "recharts";
-import { cinesignalLocal } from "@/lib/cinesignalLocal";
+import { cinesignalClient } from "@/lib/cinesignalClient";
 
 const Analytics = () => {
   const [genreData, setGenreData] = useState([]);
@@ -13,9 +13,9 @@ const Analytics = () => {
   const fetchAnalytics = async () => {
     try {
       const [genreRes, trendRes, comboRes] = await Promise.all([
-        cinesignalLocal.getGenrePerformance(),
-        cinesignalLocal.getTrends(8),
-        cinesignalLocal.getGenreCombinations(),
+        cinesignalClient.getGenrePerformance(),
+        cinesignalClient.getTrends(8),
+        cinesignalClient.getGenreCombinations(),
       ]);
       setGenreData(genreRes.data);
       setTrendData(trendRes.data);
@@ -33,9 +33,24 @@ const Analytics = () => {
 
   return (
     <div className="space-y-6" data-testid="analytics-view">
-      <div>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <h2 className="text-3xl font-black text-white tracking-tight">Genre Performance Analytics</h2>
-        <p className="text-slate-500 mt-1">Data-driven genre analysis across 500+ movies</p>
+        <p className="text-slate-500 mt-1 max-w-2xl">A studio-facing read on which genres are holding theatrical weight, which ones overperform on OTT, and where blended concepts become commercially clearer.</p>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {[
+          { label: "Highest theatrical genre", value: genreData[0]?.genre || "Action", hint: `${genreData[0]?.box_office || 0} score`, tone: "text-amber-300" },
+          { label: "Best OTT pull", value: [...genreData].sort((a, b) => b.ott - a.ott)[0]?.genre || "Thriller", hint: `${[...genreData].sort((a, b) => b.ott - a.ott)[0]?.ott || 0} OTT score`, tone: "text-fuchsia-300" },
+          { label: "Cleanest blend", value: combinationData[0]?.genres?.join(" + ") || "Action + Drama", hint: `${combinationData[0]?.avg_score || 0} combined score`, tone: "text-emerald-300" },
+          { label: "Trend signal", value: trendData[trendData.length - 1]?.year || "-", hint: `${trendData[trendData.length - 1]?.avg_score || 0} avg score`, tone: "text-sky-300" },
+        ].map((card) => (
+          <div key={card.label} className="rounded-2xl border border-slate-800/50 bg-[#111827]/75 p-4 shadow-[0_20px_60px_rgba(2,6,23,0.3)]">
+            <div className="text-[11px] uppercase tracking-[0.22em] text-slate-500">{card.label}</div>
+            <div className={`mt-3 text-xl font-black ${card.tone}`}>{card.value}</div>
+            <div className="mt-1 text-xs text-slate-500">{card.hint}</div>
+          </div>
+        ))}
       </div>
 
       {/* Genre Performance Bar Chart */}
@@ -72,7 +87,7 @@ const Analytics = () => {
       {/* Top Genre Combinations */}
       <div className="bg-[#111827]/80 rounded-2xl border border-slate-800/40 p-6">
         <h3 className="text-white font-bold mb-5">Top Genre Combinations</h3>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-2">
+        <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
           {combinationData.map((combo, i) => (
             <div key={i} className="bg-slate-900/50 rounded-lg p-3 flex items-center justify-between border border-slate-800/20">
               <div className="flex items-center gap-2.5">
@@ -89,7 +104,7 @@ const Analytics = () => {
       </div>
 
       {/* Genre Stats Grid */}
-      <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-2">
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {genreData.slice(0, 10).map((g, i) => (
           <div key={i} className="bg-[#111827]/80 rounded-xl border border-slate-800/40 p-4">
             <div className="text-white font-bold text-sm mb-2">{g.genre}</div>

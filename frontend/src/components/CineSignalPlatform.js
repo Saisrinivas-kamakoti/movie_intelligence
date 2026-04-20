@@ -10,10 +10,8 @@ import DirectorSuite from "@/components/DirectorSuite";
 import Workspace from "@/components/Workspace";
 import LoginPage from "@/components/LoginPage";
 import AuthCallback from "@/components/AuthCallback";
-import { Film, LogIn, LogOut, Sparkles } from "lucide-react";
-import { cinesignalLocal } from "@/lib/cinesignalLocal";
-
-const backendBase = "Netlify browser runtime";
+import { Film, LogIn, LogOut, Sparkles, Radar, Clapperboard, Database } from "lucide-react";
+import { cinesignalClient } from "@/lib/cinesignalClient";
 
 const MainShell = () => {
   const location = useLocation();
@@ -22,6 +20,7 @@ const MainShell = () => {
   const [activeView, setActiveView] = useState("simulator");
   const [metadata, setMetadata] = useState(null);
   const [stats, setStats] = useState(null);
+  const [runtime, setRuntime] = useState(cinesignalClient.getRuntimeProfile());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -29,11 +28,12 @@ const MainShell = () => {
     const loadAppData = async () => {
       try {
         const [metadataRes, statsRes] = await Promise.all([
-          cinesignalLocal.getMetadata(),
-          cinesignalLocal.getStats(),
+          cinesignalClient.getMetadata(),
+          cinesignalClient.getStats(),
         ]);
         setMetadata(metadataRes);
         setStats(statsRes);
+        setRuntime(cinesignalClient.getRuntimeProfile());
       } catch (err) {
         setError(err.message || "Unable to load app metadata.");
       } finally {
@@ -82,7 +82,7 @@ const MainShell = () => {
       <div className="min-h-screen bg-[#0a0e1a] text-white flex items-center justify-center px-6">
         <div className="max-w-lg text-center">
           <div className="text-2xl font-black mb-3">CineSignal could not start</div>
-          <p className="text-slate-400 mb-5">{error || "The API is unavailable. Check the backend URL and try again."}</p>
+          <p className="text-slate-400 mb-5">{error || "CineSignal could not load its runtime metadata. Try refreshing the site."}</p>
           <button
             onClick={() => window.location.reload()}
             className="bg-amber-500 text-black font-bold px-5 py-3 rounded-xl"
@@ -114,16 +114,16 @@ const MainShell = () => {
 
   return (
     <div className="min-h-screen bg-[#0a0e1a] text-white">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.18),transparent_24%),radial-gradient(circle_at_top_right,rgba(59,130,246,0.14),transparent_28%),linear-gradient(180deg,#0a0e1a_0%,#09111e_100%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.18),transparent_24%),radial-gradient(circle_at_top_right,rgba(59,130,246,0.14),transparent_28%),radial-gradient(circle_at_50%_20%,rgba(236,72,153,0.08),transparent_24%),linear-gradient(180deg,#0a0e1a_0%,#09111e_100%)] pointer-events-none" />
       <div className="relative">
         <header className="border-b border-slate-800/50 bg-[#0d1224]/70 backdrop-blur-xl">
-          <div className="max-w-[1400px] mx-auto px-6 py-5 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-[1400px] mx-auto px-4 py-5 sm:px-6 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-start gap-4">
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
                 <Film size={26} />
               </div>
               <div>
-                <div className="text-2xl font-black tracking-tight">CineSignal</div>
+                <div className="text-2xl font-black tracking-tight studio-display">CineSignal</div>
                 <div className="text-slate-400 text-sm mt-1 max-w-2xl">
                   Decision intelligence for studios, OTT platforms, producers, and new directors building commercially clear stories.
                 </div>
@@ -157,26 +157,39 @@ const MainShell = () => {
             </div>
           </div>
 
-          <div className="max-w-[1400px] mx-auto px-6 pb-6">
-            <div className="grid lg:grid-cols-[1.3fr,0.7fr] gap-4">
-              <div className="rounded-3xl border border-slate-800/50 bg-[#111827]/65 p-6">
+          <div className="max-w-[1400px] mx-auto px-4 pb-6 sm:px-6">
+            <div className="grid gap-4 xl:grid-cols-[1.25fr,0.75fr]">
+              <div className="rounded-3xl border border-slate-800/50 bg-[#111827]/65 p-6 shadow-[0_30px_80px_rgba(15,23,42,0.45)]">
                 <div className="text-[11px] uppercase tracking-[0.24em] text-amber-400 mb-3">Studio-ready predictor</div>
-                <h1 className="text-4xl lg:text-5xl font-black leading-tight tracking-tight max-w-4xl">
+                <h1 className="studio-display text-4xl lg:text-5xl font-black leading-tight tracking-tight max-w-4xl">
                   Forecast genre fit, OTT potential, regional demand, and pitch clarity before the script turns expensive.
                 </h1>
                 <p className="text-slate-400 mt-4 max-w-3xl leading-7">
                   Build concepts, compare greenlight shapes, test director-style presets, and use the new idea lab to improve story concepts with budget, inspiration, and location guidance.
                 </p>
+                <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                  {[
+                    { label: "Forecast engine", value: "Genre + ROI + OTT fit", icon: Radar, tone: "text-amber-300" },
+                    { label: "Director lab", value: "Concept coaching + inspiration", icon: Clapperboard, tone: "text-fuchsia-300" },
+                    { label: "Data runtime", value: runtime.mode === "local" ? "Netlify browser mode" : "Hybrid API mode", icon: Database, tone: "text-emerald-300" },
+                  ].map(({ label, value, icon: Icon, tone }) => (
+                    <div key={label} className="rounded-2xl border border-slate-800/60 bg-slate-950/35 p-4">
+                      <Icon size={16} className={tone} />
+                      <div className="mt-3 text-[11px] uppercase tracking-[0.22em] text-slate-500">{label}</div>
+                      <div className="mt-2 text-sm font-semibold text-white">{value}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              <div className="rounded-3xl border border-slate-800/50 bg-[#111827]/65 p-6">
+              <div className="rounded-3xl border border-slate-800/50 bg-[#111827]/65 p-6 shadow-[0_30px_80px_rgba(15,23,42,0.45)]">
                 <div className="flex items-center gap-2 text-violet-300 text-sm font-semibold mb-4">
                   <Sparkles size={16} /> Deployment profile
                 </div>
                 <div className="space-y-3 text-sm">
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500">Backend</span>
-                    <span className="text-white font-semibold">{backendBase}</span>
+                    <span className="text-white font-semibold">{runtime.backendBase}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500">Database mode</span>
@@ -184,10 +197,14 @@ const MainShell = () => {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500">Auth</span>
-                    <span className="text-white font-semibold">{user ? "Local browser account" : "Guest mode available"}</span>
+                    <span className="text-white font-semibold">{user ? runtime.authMode : "Guest mode available"}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500">Persistence</span>
+                    <span className="text-white font-semibold">{runtime.persistence}</span>
                   </div>
                   <div className="text-slate-400 leading-6 pt-2 border-t border-slate-800/60">
-                    This Netlify-only build runs entirely in the browser using local storage for workspace, feedback, and lightweight account state.
+                    This release is optimized for Netlify, but the runtime is now wrapped in a client layer so a real API can be added later without replacing the full UI.
                   </div>
                 </div>
               </div>
@@ -197,7 +214,7 @@ const MainShell = () => {
 
         <Navigation activeView={activeView} setActiveView={setActiveView} isLoggedIn={Boolean(user)} />
 
-        <main className="max-w-[1400px] mx-auto px-6 py-8">
+        <main className="max-w-[1400px] mx-auto px-4 py-8 sm:px-6">
           {renderView()}
         </main>
       </div>

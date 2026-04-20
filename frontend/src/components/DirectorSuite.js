@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BookOpen, ChevronDown, ChevronRight, Play, Sparkles, Users } from "lucide-react";
 import DirectorIdeaLab from "@/components/DirectorIdeaLab";
-import { cinesignalLocal } from "@/lib/cinesignalLocal";
+import { cinesignalClient } from "@/lib/cinesignalClient";
 
 const sanitize = (text = "") =>
   text
@@ -27,8 +27,8 @@ const DirectorSuite = ({ metadata }) => {
   const fetchData = async () => {
     try {
       const [presetsRes, casesRes] = await Promise.all([
-        cinesignalLocal.getDirectorPresets(),
-        cinesignalLocal.getCaseStudies(),
+        cinesignalClient.getDirectorPresets(),
+        cinesignalClient.getCaseStudies(),
       ]);
       setPresets(presetsRes.presets);
       setCaseStudies(casesRes.case_studies);
@@ -43,7 +43,7 @@ const DirectorSuite = ({ metadata }) => {
     setTesting(true);
     setPresetResult(null);
     try {
-      const res = await cinesignalLocal.testDirectorPreset(presetId);
+      const res = await cinesignalClient.testDirectorPreset(presetId);
       setPresetResult(res);
       setActivePreset(presetId);
       setActiveTab("presets");
@@ -95,7 +95,7 @@ const DirectorSuite = ({ metadata }) => {
               <Users size={18} className="text-amber-400" /> Director Style Presets
             </h3>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {presets.map((preset) => (
                 <div
                   key={preset.id}
@@ -147,7 +147,7 @@ const DirectorSuite = ({ metadata }) => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-4">
+              <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4 mb-4">
                 {[
                   { label: "India", value: presetResult.prediction.market_scores?.india_fit, color: "text-orange-400" },
                   { label: "Global", value: presetResult.prediction.market_scores?.global_fit, color: "text-sky-400" },

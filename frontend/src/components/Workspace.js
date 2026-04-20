@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/components/AuthContext";
 import { Save, Trash2, FileText, Layers, StickyNote, Plus, X } from "lucide-react";
-import { cinesignalLocal } from "@/lib/cinesignalLocal";
+import { cinesignalClient } from "@/lib/cinesignalClient";
 
 const Workspace = () => {
   const { user } = useAuth();
@@ -21,9 +21,9 @@ const Workspace = () => {
   const fetchWorkspace = async () => {
     try {
       const [simsRes, compsRes, notesRes] = await Promise.all([
-        cinesignalLocal.getSimulations(),
-        cinesignalLocal.getComparisons(),
-        cinesignalLocal.getNotes(),
+        cinesignalClient.getSimulations(),
+        cinesignalClient.getComparisons(),
+        cinesignalClient.getNotes(),
       ]);
       setSimulations(simsRes);
       setComparisons(compsRes);
@@ -37,14 +37,14 @@ const Workspace = () => {
 
   const deleteSimulation = async (simId) => {
     try {
-      await cinesignalLocal.deleteSimulation(simId);
+      await cinesignalClient.deleteSimulation(simId);
       setSimulations(simulations.filter(s => s.sim_id !== simId));
     } catch (err) { console.error(err); }
   };
 
   const deleteComparison = async (compId) => {
     try {
-      await cinesignalLocal.deleteComparison(compId);
+      await cinesignalClient.deleteComparison(compId);
       setComparisons(comparisons.filter(c => c.comp_id !== compId));
     } catch (err) { console.error(err); }
   };
@@ -52,7 +52,7 @@ const Workspace = () => {
   const createNote = async () => {
     if (!noteTitle.trim()) return;
     try {
-      await cinesignalLocal.createNote({ title: noteTitle, content: noteContent, category: "general" });
+      await cinesignalClient.createNote({ title: noteTitle, content: noteContent, category: "general" });
       setNoteTitle(""); setNoteContent(""); setShowNoteForm(false);
       fetchWorkspace();
     } catch (err) { console.error(err); }
@@ -60,7 +60,7 @@ const Workspace = () => {
 
   const deleteNote = async (noteId) => {
     try {
-      await cinesignalLocal.deleteNote(noteId);
+      await cinesignalClient.deleteNote(noteId);
       setNotes(notes.filter(n => n.note_id !== noteId));
     } catch (err) { console.error(err); }
   };

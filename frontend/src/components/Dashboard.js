@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Globe, Target, Trophy, TrendingUp } from "lucide-react";
-import { cinesignalLocal } from "@/lib/cinesignalLocal";
+import { cinesignalClient } from "@/lib/cinesignalClient";
 
 const Dashboard = () => {
   const [regionalData, setRegionalData] = useState([]);
@@ -13,9 +13,9 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       const [regionalRes, audienceRes, moviesRes] = await Promise.all([
-        cinesignalLocal.getRegionalAnalysis(),
-        cinesignalLocal.getAudienceInsights(),
-        cinesignalLocal.getTopMovies(10),
+        cinesignalClient.getRegionalAnalysis(),
+        cinesignalClient.getAudienceInsights(),
+        cinesignalClient.getTopMovies(10),
       ]);
       setRegionalData(regionalRes.data);
       setAudienceData(audienceRes.segments);
@@ -31,13 +31,13 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6" data-testid="dashboard-view">
-      <div>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <h2 className="text-3xl font-black text-white tracking-tight">Market Intelligence</h2>
-        <p className="text-slate-500 mt-1">Regional analysis, audience segments & top performers</p>
+        <p className="text-slate-500 mt-1 max-w-2xl">Map where ideas travel, which audience clusters are easier to unlock, and what recent winners reveal about regional demand behavior.</p>
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[
           { label: "Regions", value: regionalData.length, color: "text-amber-400", icon: Globe },
           { label: "Segments", value: audienceData ? Object.keys(audienceData).length : 0, color: "text-violet-400", icon: Target },
@@ -52,7 +52,7 @@ const Dashboard = () => {
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-4">
+      <div className="grid gap-4 xl:grid-cols-2">
         {/* Regional Performance */}
         <div className="bg-[#111827]/80 rounded-2xl border border-slate-800/40 p-5">
           <h3 className="text-white font-bold text-sm flex items-center gap-2 mb-4">

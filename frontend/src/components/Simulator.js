@@ -3,7 +3,7 @@ import { Slider } from "@/components/ui/slider";
 import { Zap, TrendingUp, Target, AlertTriangle, DollarSign, Film, Save } from "lucide-react";
 import PredictionResults from "@/components/PredictionResults";
 import FeedbackPanel from "@/components/FeedbackPanel";
-import { cinesignalLocal } from "@/lib/cinesignalLocal";
+import { cinesignalClient } from "@/lib/cinesignalClient";
 
 const Simulator = ({ metadata, user }) => {
   const [formData, setFormData] = useState({
@@ -36,7 +36,7 @@ const Simulator = ({ metadata, user }) => {
   const handleSaveToWorkspace = async () => {
     if (!prediction) return;
     try {
-      await cinesignalLocal.saveSimulation({
+      await cinesignalClient.saveSimulation({
         title: `${formData.genres.join(" + ")} - Score ${prediction.overall_score}`,
         concept: formData,
         prediction,
@@ -58,7 +58,7 @@ const Simulator = ({ metadata, user }) => {
     setError(null);
     setShowFeedback(false);
     try {
-      const response = await cinesignalLocal.simulateConcept(formData);
+      const response = await cinesignalClient.simulateConcept(formData);
       setPrediction(response);
       setShowFeedback(true);
     } catch (err) {
@@ -68,9 +68,9 @@ const Simulator = ({ metadata, user }) => {
     }
   };
 
-  const handleExportPDF = async () => {
+  const handleExportBrief = async () => {
     try {
-      const blob = await cinesignalLocal.exportPitchDeck(formData, prediction);
+      const blob = await cinesignalClient.exportPitchDeck(formData, prediction);
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -79,7 +79,7 @@ const Simulator = ({ metadata, user }) => {
       link.click();
       link.remove();
     } catch (err) {
-      console.error("PDF export error:", err);
+      console.error("Brief export error:", err);
     }
   };
 
@@ -88,7 +88,19 @@ const Simulator = ({ metadata, user }) => {
       {/* Hero */}
       <div className="mb-8">
         <h2 className="text-3xl font-black text-white tracking-tight">Test Your Film Concept</h2>
-        <p className="text-slate-500 mt-1">AI-powered predictions with Heuristic + Neural Network dual engine</p>
+        <p className="text-slate-500 mt-1 max-w-3xl">Shape a concept the way a studio meeting would: define the genre spine, tune the budget lane, pressure-test audience fit, and then package the idea into a brief you can defend.</p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          {[
+            ["1. Build", "Choose up to three genres and set the market posture."],
+            ["2. Score", "Compare theatrical, OTT, India, and global performance signals."],
+            ["3. Save", "Drop strong concepts into your local workspace and keep iterating."],
+          ].map(([title, copy]) => (
+            <div key={title} className="rounded-2xl border border-slate-800/60 bg-[#111827]/70 p-4">
+              <div className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400">{title}</div>
+              <div className="mt-2 text-sm text-slate-400">{copy}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-5 gap-8">
@@ -98,7 +110,7 @@ const Simulator = ({ metadata, user }) => {
             {/* Genres */}
             <div>
               <label className="text-white text-sm font-semibold mb-2.5 block">Genres <span className="text-slate-500 font-normal">(Max 3)</span></label>
-              <div className="grid grid-cols-3 gap-1.5">
+              <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
                 {metadata.genres.map((genre) => (
                   <button
                     key={genre}
@@ -118,7 +130,7 @@ const Simulator = ({ metadata, user }) => {
             </div>
 
             {/* Dropdowns Row */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <label className="text-white text-xs font-semibold mb-1.5 block">Tone</label>
                 <select
@@ -143,7 +155,7 @@ const Simulator = ({ metadata, user }) => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <label className="text-white text-xs font-semibold mb-1.5 block">Release</label>
                 <select
@@ -209,7 +221,7 @@ const Simulator = ({ metadata, user }) => {
             {prediction && (
               <button
                 type="button"
-                onClick={handleExportPDF}
+                onClick={handleExportBrief}
                 className="w-full bg-slate-800 hover:bg-slate-700 text-white font-medium py-3 rounded-xl border border-slate-700/50 transition-all flex items-center justify-center gap-2 text-sm"
                 data-testid="export-pdf-button"
               >
@@ -249,7 +261,7 @@ const Simulator = ({ metadata, user }) => {
             <div className="flex items-center justify-center h-96 bg-[#111827]/40 rounded-2xl border border-dashed border-slate-800/50">
               <div className="text-center">
                 <Film size={48} className="text-slate-700 mx-auto mb-4" />
-                <p className="text-slate-600 text-sm">Select genres and configure your concept to see predictions</p>
+                <p className="text-slate-600 text-sm max-w-sm">Start with the genre spine and audience posture. CineSignal will turn that into a market-fit score, revenue range, and packaging guidance.</p>
               </div>
             </div>
           )}

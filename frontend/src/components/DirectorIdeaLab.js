@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { BookOpen, MapPin, Sparkles, Wand2 } from "lucide-react";
-import { cinesignalLocal } from "@/lib/cinesignalLocal";
+import { cinesignalClient } from "@/lib/cinesignalClient";
 
 const sanitize = (text = "") =>
   text
@@ -32,7 +32,7 @@ const DirectorIdeaLab = ({ metadata }) => {
     setResult(null);
 
     try {
-      const response = await cinesignalLocal.analyzeDirectorIdea(formData);
+      const response = await cinesignalClient.analyzeDirectorIdea(formData);
       setResult(response);
     } catch (err) {
       setError(err.response?.data?.detail || "The idea lab could not analyze this concept right now.");

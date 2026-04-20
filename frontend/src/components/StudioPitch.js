@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Plus, Trash2, ArrowUpDown, Download, BarChart3 } from "lucide-react";
-import { cinesignalLocal } from "@/lib/cinesignalLocal";
+import { cinesignalClient } from "@/lib/cinesignalClient";
 
 const StudioPitch = ({ metadata }) => {
   const emptyRow = () => ({
@@ -45,7 +45,7 @@ const StudioPitch = ({ metadata }) => {
     if (valid.length === 0) return;
     setLoading(true);
     try {
-      const response = await cinesignalLocal.compareConcepts(valid.map(({ id, ...rest }) => rest));
+      const response = await cinesignalClient.compareConcepts(valid.map(({ id, ...rest }) => rest));
       setResults(response);
     } catch (err) {
       console.error("Comparison error:", err);
@@ -54,11 +54,11 @@ const StudioPitch = ({ metadata }) => {
     }
   };
 
-  const handleExportPDF = async (concept) => {
+  const handleExportBrief = async (concept) => {
     try {
       const { id, ...conceptData } = concept;
-      const prediction = await cinesignalLocal.simulateConcept(conceptData);
-      const blob = await cinesignalLocal.exportPitchDeck(conceptData, prediction);
+      const prediction = await cinesignalClient.simulateConcept(conceptData);
+      const blob = await cinesignalClient.exportPitchDeck(conceptData, prediction);
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -67,7 +67,7 @@ const StudioPitch = ({ metadata }) => {
       link.click();
       link.remove();
     } catch (err) {
-      console.error("PDF export error:", err);
+      console.error("Brief export error:", err);
     }
   };
 
@@ -75,7 +75,7 @@ const StudioPitch = ({ metadata }) => {
     <div data-testid="studio-pitch-view">
       <div className="mb-8">
         <h2 className="text-3xl font-black text-white tracking-tight">Studio Pitch & Comparison</h2>
-        <p className="text-slate-500 mt-1">Compare multiple concepts side-by-side, export PDF pitch decks</p>
+        <p className="text-slate-500 mt-1 max-w-3xl">Rank multiple concepts side by side, compare commercial shape, and export a pitch brief that turns raw ideas into a sharper greenlight conversation.</p>
       </div>
 
       {/* Concept Builder */}
@@ -86,7 +86,7 @@ const StudioPitch = ({ metadata }) => {
               <h3 className="text-white font-bold text-sm">Concept {index + 1}</h3>
               <div className="flex gap-2">
                 {concept.genres.length > 0 && (
-                  <button onClick={() => handleExportPDF(concept)} className="text-amber-400 hover:text-amber-300 text-xs flex items-center gap-1" data-testid={`export-concept-${index}`}>
+                  <button onClick={() => handleExportBrief(concept)} className="text-amber-400 hover:text-amber-300 text-xs flex items-center gap-1" data-testid={`export-concept-${index}`}>
                     <Download size={12} /> Brief
                   </button>
                 )}
@@ -116,7 +116,7 @@ const StudioPitch = ({ metadata }) => {
             </div>
 
             {/* Quick settings */}
-            <div className="grid grid-cols-4 gap-2 text-xs">
+            <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4 text-xs">
               <select value={concept.tone} onChange={e => updateConcept(concept.id, "tone", e.target.value)} className="bg-slate-800/80 text-white border border-slate-700/40 rounded px-2 py-1.5 text-xs">
                 {metadata.tones.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
@@ -131,7 +131,7 @@ const StudioPitch = ({ metadata }) => {
               </select>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 mt-3">
+            <div className="grid gap-3 sm:grid-cols-3 mt-3">
               {["star_power", "novelty_factor", "family_appeal"].map(key => (
                 <div key={key}>
                   <div className="flex justify-between mb-1">

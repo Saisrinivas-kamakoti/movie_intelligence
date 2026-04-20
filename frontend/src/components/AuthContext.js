@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { cinesignalLocal } from "@/lib/cinesignalLocal";
+import { cinesignalClient } from "@/lib/cinesignalClient";
 
 const AuthContext = createContext(null);
 
@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }) => {
       return;
     }
     try {
-      const currentUser = await cinesignalLocal.getCurrentUser();
+      const currentUser = await cinesignalClient.getCurrentUser();
       setUser(currentUser);
     } catch {
       setUser(null);
@@ -36,19 +36,19 @@ export const AuthProvider = ({ children }) => {
   };
 
   const loginWithEmail = async (email, password) => {
-    const result = await cinesignalLocal.login({ email, password });
+    const result = await cinesignalClient.login({ email, password });
     setUser(result);
     return result;
   };
 
   const registerWithEmail = async (email, password, name) => {
-    const result = await cinesignalLocal.register({ email, password, name });
+    const result = await cinesignalClient.register({ email, password, name });
     setUser(result);
     return result;
   };
 
   const logout = async () => {
-    await cinesignalLocal.logout();
+    await cinesignalClient.logout();
     setUser(null);
   };
 

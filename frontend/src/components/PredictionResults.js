@@ -48,7 +48,7 @@ const PredictionResults = ({ prediction }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
         {[
           { label: "India Fit", value: prediction.market_scores?.india_fit, color: "text-orange-400" },
           { label: "Global Fit", value: prediction.market_scores?.global_fit, color: "text-sky-400" },
@@ -67,7 +67,7 @@ const PredictionResults = ({ prediction }) => {
           <h3 className="text-white font-bold text-sm flex items-center gap-2 mb-3">
             <IndianRupee size={15} className="text-emerald-400" /> ROI Estimate
           </h3>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid gap-3 sm:grid-cols-3">
             <div className="bg-slate-900/50 rounded-lg p-3">
               <div className="text-lg font-black text-emerald-400" data-testid="roi-pct">{roi.estimated_roi_pct}%</div>
               <div className="text-slate-500 text-[10px]">Est. ROI</div>
@@ -83,7 +83,7 @@ const PredictionResults = ({ prediction }) => {
               <div className="text-slate-500 text-[10px]">Risk Level</div>
             </div>
           </div>
-          <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+          <div className="mt-3 grid gap-2 sm:grid-cols-2 text-xs">
             <div className="text-slate-400">Theatrical: <span className="text-white font-semibold">{roi.estimated_theatrical_cr}Cr</span></div>
             <div className="text-slate-400">OTT Value: <span className="text-white font-semibold">{roi.estimated_ott_value_cr}Cr</span></div>
             <div className="text-slate-400">Budget: <span className="text-white font-semibold">{roi.estimated_budget_cr}Cr</span></div>
@@ -123,7 +123,7 @@ const PredictionResults = ({ prediction }) => {
         </ul>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid gap-4 xl:grid-cols-2">
         <div className="bg-[#111827]/80 rounded-2xl border border-slate-800/40 p-5">
           <h3 className="text-white font-bold text-sm mb-3">Target Audience</h3>
           <div className="flex flex-wrap gap-1.5">
